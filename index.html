@@ -1,15 +1,551 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Azure DevOps CI/CD</title>
-</head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kiran Kumar — Linux System Administrator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :root {
+      --bg:        #0a0e14;
+      --bg2:       #0f1520;
+      --bg3:       #141c2e;
+      --border:    #1e2d47;
+      --accent:    #00d4ff;
+      --accent2:   #0090bb;
+      --green:     #00ff88;
+      --text:      #e2eaf4;
+      --muted:     #6b8199;
+      --card:      #111827;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── grid background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── glow orbs ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: rgba(0,212,255,0.06);
+      top: -100px; left: -100px;
+      animation: float1 8s ease-in-out infinite;
+    }
+    .orb-2 {
+      width: 400px; height: 400px;
+      background: rgba(0,255,136,0.04);
+      bottom: -100px; right: -100px;
+      animation: float2 10s ease-in-out infinite;
+    }
+
+    @keyframes float1 {
+      0%,100% { transform: translate(0,0); }
+      50% { transform: translate(30px, 30px); }
+    }
+    @keyframes float2 {
+      0%,100% { transform: translate(0,0); }
+      50% { transform: translate(-20px, -20px); }
+    }
+
+    /* ── wrapper ── */
+    .wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    /* ── terminal bar ── */
+    .terminal-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 60px;
+      opacity: 0;
+      animation: fadeDown 0.6s ease forwards;
+    }
+    .dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+    }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #febc2e; }
+    .dot-g { background: #28c840; }
+    .term-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--muted);
+      margin-left: 8px;
+    }
+    .term-text span { color: var(--accent); }
+
+    /* ── hero ── */
+    .hero {
+      margin-bottom: 64px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,212,255,0.08);
+      border: 1px solid rgba(0,212,255,0.2);
+      border-radius: 100px;
+      padding: 6px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--accent);
+      margin-bottom: 28px;
+      opacity: 0;
+      animation: fadeDown 0.6s 0.1s ease forwards;
+    }
+    .badge-dot {
+      width: 7px; height: 7px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .hero h1 {
+      font-size: clamp(42px, 7vw, 72px);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -2px;
+      margin-bottom: 8px;
+      opacity: 0;
+      animation: fadeDown 0.6s 0.2s ease forwards;
+    }
+    .hero h1 .accent { color: var(--accent); }
+
+    .hero .role {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(14px, 2vw, 17px);
+      color: var(--muted);
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeDown 0.6s 0.3s ease forwards;
+    }
+    .hero .role span { color: var(--green); }
+
+    .hero p {
+      font-size: 16px;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 580px;
+      opacity: 0;
+      animation: fadeDown 0.6s 0.4s ease forwards;
+    }
+
+    /* ── divider ── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent), transparent);
+      margin: 48px 0;
+      opacity: 0;
+      animation: fadeIn 0.6s 0.5s ease forwards;
+    }
+
+    /* ── section label ── */
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeDown 0.6s 0.6s ease forwards;
+    }
+
+    /* ── project cards ── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+      opacity: 0;
+      animation: fadeUp 0.6s ease forwards;
+      display: block;
+    }
+    .card:nth-child(1) { animation-delay: 0.65s; }
+    .card:nth-child(2) { animation-delay: 0.75s; }
+    .card:nth-child(3) { animation-delay: 0.85s; }
+
+    .card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,212,255,0.1);
+    }
+
+    .card-icon {
+      font-size: 28px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .card-provider {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+
+    .card p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+    .tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .card-link {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .card-link::after {
+      content: '→';
+      transition: transform 0.2s;
+    }
+    .card:hover .card-link::after {
+      transform: translateX(4px);
+    }
+
+    /* GitHub card special */
+    .card.github-card:hover {
+      border-color: var(--green);
+      box-shadow: 0 12px 40px rgba(0,255,136,0.08);
+    }
+    .card.github-card .card-provider { color: var(--green); }
+    .card.github-card .card-link { color: var(--green); }
+
+    /* ── skills row ── */
+    .skills-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 48px;
+      opacity: 0;
+      animation: fadeUp 0.6s 0.9s ease forwards;
+    }
+
+    .skill-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      padding: 7px 16px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+      background: var(--bg2);
+      color: var(--text);
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .skill-pill:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .skill-pill.highlight {
+      border-color: rgba(0,212,255,0.3);
+      background: rgba(0,212,255,0.06);
+      color: var(--accent);
+    }
+
+    /* ── experience strip ── */
+    .exp-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 48px;
+      opacity: 0;
+      animation: fadeUp 0.6s 1s ease forwards;
+    }
+    .exp-item {
+      background: var(--card);
+      padding: 24px 20px;
+      text-align: center;
+    }
+    .exp-num {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .exp-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+
+    /* ── footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding-top: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: gap;
+      gap: 16px;
+      opacity: 0;
+      animation: fadeIn 0.6s 1.1s ease forwards;
+    }
+    .footer-left {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .footer-left span { color: var(--accent); }
+    .footer-right {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ── animations ── */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    /* ── responsive ── */
+    @media (max-width: 600px) {
+      .wrapper { padding: 40px 16px 60px; }
+      .hero h1 { letter-spacing: -1px; }
+      footer { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
 <body>
 
-<h1>Hello from Azure DevOps Pipeline</h1>
-<p>This page is deployed automatically.</p>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
 
-<img src="images/myimage.jpeg" width="300">
+  <div class="wrapper">
+
+    <!-- Terminal bar -->
+    <div class="terminal-bar">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+      <span class="term-text">
+        <span>kiran@kirantechlab</span>:~$ cat portfolio.md
+      </span>
+    </div>
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="badge">
+        <div class="badge-dot"></div>
+        Available for immediate joining
+      </div>
+
+      <h1>Kiran <span class="accent">Kumar</span></h1>
+
+      <div class="role">
+        <span>$</span> Linux System Administrator &nbsp;|&nbsp; L2 Production Support &nbsp;|&nbsp; Azure &amp; AWS
+      </div>
+
+      <p>
+        4+ years supporting production Linux environments (RHEL/CentOS) in 24/7 
+        SLA-driven operations. Experienced in L2 troubleshooting — SSH, DNS, disk, 
+        service outages, and performance issues. Hands-on lab practice across 
+        VMware, Azure, and AWS.
+      </p>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Stats -->
+    <div class="exp-strip">
+      <div class="exp-item">
+        <div class="exp-num">4+</div>
+        <div class="exp-label">Years Experience</div>
+      </div>
+      <div class="exp-item">
+        <div class="exp-num">L2</div>
+        <div class="exp-label">Support Level</div>
+      </div>
+      <div class="exp-item">
+        <div class="exp-num">3</div>
+        <div class="exp-label">Lab Projects</div>
+      </div>
+      <div class="exp-item">
+        <div class="exp-num">24/7</div>
+        <div class="exp-label">SLA Operations</div>
+      </div>
+    </div>
+
+    <!-- Projects -->
+    <div class="section-label">// Lab Projects</div>
+
+    <div class="cards">
+
+      <!-- Azure -->
+      <a class="card" href="https://azure.kirantechlab.online" target="_blank">
+        <span class="card-icon">☁️</span>
+        <div class="card-provider">Microsoft Azure</div>
+        <h3>Azure Linux Infrastructure</h3>
+        <p>Multi-VM setup with VNet, NSG, Nginx, and HTTPS. Incident simulation — NSG misconfig, SSH failures, DNS issues.</p>
+        <div class="card-tags">
+          <span class="tag">Ubuntu</span>
+          <span class="tag">VNet</span>
+          <span class="tag">NSG</span>
+          <span class="tag">Nginx</span>
+          <span class="tag">SSL</span>
+        </div>
+        <div class="card-link">azure.kirantechlab.online</div>
+      </a>
+
+      <!-- AWS -->
+      <a class="card" href="https://aws.kirantechlab.online" target="_blank">
+        <span class="card-icon">⚡</span>
+        <div class="card-provider">Amazon AWS</div>
+        <h3>AWS EC2 Linux Web Server</h3>
+        <p>EC2 with VPC, Elastic IP, security groups, Nginx, and HTTPS. SSH and web connectivity troubleshooting.</p>
+        <div class="card-tags">
+          <span class="tag">EC2</span>
+          <span class="tag">VPC</span>
+          <span class="tag">Nginx</span>
+          <span class="tag">SSL</span>
+          <span class="tag">Bash</span>
+        </div>
+        <div class="card-link">aws.kirantechlab.online</div>
+      </a>
+
+      <!-- GitHub -->
+      <a class="card github-card" href="https://github.com/ch33kiran1" target="_blank">
+        <span class="card-icon">⌨️</span>
+        <div class="card-provider">GitHub</div>
+        <h3>Lab Scripts &amp; Documentation</h3>
+        <p>VMware multi-node lab, Bash scripts, Ansible configs, incident scenarios, and architecture docs.</p>
+        <div class="card-tags">
+          <span class="tag">RHEL</span>
+          <span class="tag">VMware</span>
+          <span class="tag">Ansible</span>
+          <span class="tag">Bash</span>
+          <span class="tag">NFS</span>
+        </div>
+        <div class="card-link">github.com/ch33kiran1</div>
+      </a>
+
+    </div>
+
+    <!-- Skills -->
+    <div class="section-label">// Core Skills</div>
+
+    <div class="skills-row">
+      <span class="skill-pill highlight">RHEL / CentOS</span>
+      <span class="skill-pill highlight">Ubuntu</span>
+      <span class="skill-pill highlight">SSH Troubleshooting</span>
+      <span class="skill-pill highlight">DNS / BIND</span>
+      <span class="skill-pill">Disk Management</span>
+      <span class="skill-pill">Service Management</span>
+      <span class="skill-pill">systemctl / journalctl</span>
+      <span class="skill-pill">LVM</span>
+      <span class="skill-pill">NFS / SFTP</span>
+      <span class="skill-pill">Nginx / Apache</span>
+      <span class="skill-pill">Microsoft Azure</span>
+      <span class="skill-pill">AWS EC2</span>
+      <span class="skill-pill">Bash Scripting</span>
+      <span class="skill-pill">Ansible</span>
+      <span class="skill-pill">Git / GitHub</span>
+      <span class="skill-pill">ServiceNow</span>
+      <span class="skill-pill">VMware</span>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <div class="footer-left">
+        <span>kirantechlab.online</span> &nbsp;·&nbsp; Andhra Pradesh, India
+      </div>
+      <div class="footer-right">
+        chkiran1001@gmail.com
+      </div>
+    </footer>
+
+  </div>
 
 </body>
 </html>
