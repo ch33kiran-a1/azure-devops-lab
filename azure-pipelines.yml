@@ -8,5 +8,5 @@ steps:
 - checkout: self
 
 - script: |
-    rsync -avz ./ kiranadmin@192.168.92.129:/var/www/html/
+    rsync -avz ./ ubuntu@65.0.230.85:/var/www/html/
   displayName: Deploy website
