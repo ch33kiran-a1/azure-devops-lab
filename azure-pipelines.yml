@@ -1,12 +1,6 @@
-trigger:
-- main
-
-pool:
-  name: Default
-
-steps:
-- checkout: self
-
-- script: |
-    rsync -avz ./ ubuntu@65.0.230.85:/var/www/html/
+- task: CmdLine@2
   displayName: Deploy website
+  inputs:
+    script: |
+      rsync -avz -e "ssh -o StrictHostKeyChecking=no" ./ ubuntu@<PUBLIC-IP>:/var/www/html/
+      ssh -o StrictHostKeyChecking=no ubuntu@65.0.230.85 "sudo systemctl restart nginx"
